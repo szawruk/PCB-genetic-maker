@@ -16,9 +16,10 @@ SEGMENTS_OUTSIDE_BOARD_PENALTY_WEIGHT = 5
 
 
 class Chromosome:
-    def __init__(self, pcb_data_object: PCBData):
+    def __init__(self, pcb_data_object: PCBData = None):
         self.pcb_data_object = pcb_data_object
         self.paths = []
+        self.penalty_points = 0
 
     def generate_random_paths(self):
         # print("start generating random paths")
@@ -187,13 +188,15 @@ class Chromosome:
 
         return length_of_paths_outside_board
 
-    def penalty_function(self):
-        penalty_points = 0
-        penalty_points += self.get_cross_count() * CROSS_PENALTY_WEIGHT\
-            + self.get_total_path_length() * PATHS_LENGTH_PENALTY_WEIGHT\
-            + self.get_total_segments_count() * SEGMENTS_COUNT_PENALTY_WEIGHT\
-            + self.get_paths_count_outside_board() * PATHS_NOT_IN_BOARD_PENALTY_WEIGHT\
-            + self.get_segments_count_outside_board() * SEGMENTS_OUTSIDE_BOARD_PENALTY_WEIGHT
+    def penalty_function(self, refresh=False):
+        if self.penalty_points != 0 and refresh is False:
+            return self.penalty_points
+
+        self.penalty_points += self.get_cross_count() * CROSS_PENALTY_WEIGHT \
+                               + self.get_total_path_length() * PATHS_LENGTH_PENALTY_WEIGHT \
+                               + self.get_total_segments_count() * SEGMENTS_COUNT_PENALTY_WEIGHT \
+                               + self.get_paths_count_outside_board() * PATHS_NOT_IN_BOARD_PENALTY_WEIGHT \
+                               + self.get_segments_count_outside_board() * SEGMENTS_OUTSIDE_BOARD_PENALTY_WEIGHT
 
         # print(f"Total line cross count: {self.get_cross_count()}")
         # print(f"Total paths length: {self.get_total_path_length()}")
@@ -201,6 +204,4 @@ class Chromosome:
         # print(f"Outside paths count: {self.get_paths_count_outside_board()}")
         # print(f"Paths length outside the board: {self.get_segments_count_outside_board()}")
 
-        return penalty_points
-
-
+        return self.penalty_points
